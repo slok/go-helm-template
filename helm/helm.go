@@ -1,9 +1,12 @@
 package helm
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/fs"
+	"regexp"
+	"strings"
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
@@ -17,11 +20,20 @@ type Chart struct {
 
 // TemplateConfig is the configuration for Helm Template rendering.
 type TemplateConfig struct {
+	// ReleaseName is the name of the release.
 	ReleaseName string
-	Chart       *Chart
-	Values      map[string]interface{}
+	// Chart is the loaded chart. Use `LoadChart`.
+	Chart *Chart
+	// Values are the custom values to be used on the chart template..
+	Values map[string]interface{}
+	// IncludeCRDs when enabled will template/render the CRDs.
 	IncludeCRDs bool
-	Namespace   string
+	// Namespace is the namespace used to render the chart.
+	Namespace string
+	// ShowFiles is a list of files that can be used to only template the provided files,
+	// by default it will render all.
+	// This can be handy on specific use cases like unit tests for charts.
+	ShowFiles []string
 }
 
 func (c *TemplateConfig) defaults() error {
@@ -40,7 +52,8 @@ func (c *TemplateConfig) defaults() error {
 	return nil
 }
 
-// Template will execute run helm template in the provided chart and values.
+// Template will runhelm template in the provided chart and values without the need of the Helm binary
+// and without executing an external command.
 func Template(ctx context.Context, config TemplateConfig) (string, error) {
 	err := config.defaults()
 	if err != nil {
@@ -61,7 +74,15 @@ func Template(ctx context.Context, config TemplateConfig) (string, error) {
 		return "", fmt.Errorf("could not render helm chart correctly: %w", err)
 	}
 
-	return rel.Manifest, nil
+	manifests := rel.Manifest
+	if len(config.ShowFiles) > 0 {
+		manifests, err = filterFiles(manifests, config.ShowFiles)
+		if err != nil {
+			return "", fmt.Errorf("could not filter manifest files: %w", err)
+		}
+	}
+
+	return manifests, nil
 }
 
 // LoadChart loads a chart from a fs.FS system.
@@ -103,4 +124,39 @@ func LoadChart(ctx context.Context, f fs.FS) (*Chart, error) {
 	}
 
 	return &Chart{c: chart}, nil
+}
+
+var (
+	splitMarkRe    = regexp.MustCompile("(?m)^---")
+	fileMatchReFmt = `(?m)^# Source:.*%s$`
+)
+
+func filterFiles(rendered string, files []string) (string, error) {
+	renderedSplit := splitMarkRe.Split(rendered, -1)
+	filteredRendered := []string{}
+	for _, f := range files {
+		found := false
+		for _, text := range renderedSplit {
+			regex := fmt.Sprintf(fileMatchReFmt, f)
+			match, err := regexp.MatchString(regex, text)
+			if err != nil {
+				return "", fmt.Errorf("could not match file: %w", err)
+			}
+			if match {
+				found = true
+				filteredRendered = append(filteredRendered, text)
+				break
+			}
+		}
+		if !found {
+			return "", fmt.Errorf("no match for file: %q ", f)
+		}
+	}
+
+	var b bytes.Buffer
+	for _, m := range filteredRendered {
+		_, _ = fmt.Fprintf(&b, "---\n%s", strings.TrimSpace(m))
+	}
+
+	return b.String(), nil
 }
