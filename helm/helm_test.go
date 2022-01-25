@@ -6,8 +6,9 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/slok/go-helm-template/helm"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/slok/go-helm-template/helm"
 )
 
 func newTestChartFS() fstest.MapFS {
@@ -130,6 +131,47 @@ func TestTemplate(t *testing.T) {
 				IncludeCRDs: true,
 			},
 			expManifests: "---\n# Source: crds/something.yaml\nthis-is: a CRD\n---\n# Source: test-chart/templates/something.yaml\nsomething: something\n",
+		},
+
+		"Filtering files should only return the files specified.": {
+			chart: func() *helm.Chart {
+				chartFS := newTestChartFS()
+				chartFS["values.yaml"] = &fstest.MapFile{Data: []byte("someValue: something")}
+				chartFS["templates/something.yaml"] = &fstest.MapFile{Data: []byte(`something: something`)}
+				chartFS["templates/something1.yaml"] = &fstest.MapFile{Data: []byte(`something1: something1`)}
+				chartFS["templates/something2.yaml"] = &fstest.MapFile{Data: []byte(`something2: something2`)}
+				chartFS["templates/something3.yaml"] = &fstest.MapFile{Data: []byte(`something3: something3`)}
+				chartFS["templates/something4.yaml"] = &fstest.MapFile{Data: []byte(`something4: something4`)}
+				c := mustLoadChart(chartFS)
+				return c
+			},
+			config: helm.TemplateConfig{
+				ReleaseName: "test",
+				ShowFiles: []string{
+					"templates/something.yaml",
+					"templates/something1.yaml",
+					"templates/something3.yaml",
+				},
+			},
+			expManifests: "---\n# Source: test-chart/templates/something.yaml\nsomething: something---\n# Source: test-chart/templates/something1.yaml\nsomething1: something1---\n# Source: test-chart/templates/something3.yaml\nsomething3: something3",
+		},
+
+		"Filtering missing files should faul.": {
+			chart: func() *helm.Chart {
+				chartFS := newTestChartFS()
+				chartFS["values.yaml"] = &fstest.MapFile{Data: []byte("someValue: something")}
+				chartFS["templates/something.yaml"] = &fstest.MapFile{Data: []byte(`something: something`)}
+				c := mustLoadChart(chartFS)
+				return c
+			},
+			config: helm.TemplateConfig{
+				ReleaseName: "test",
+				ShowFiles: []string{
+					"templates/something.yaml",
+					"templates/something1.yaml",
+				},
+			},
+			expErr: true,
 		},
 	}
 
