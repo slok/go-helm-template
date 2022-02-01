@@ -1,6 +1,6 @@
 # go-helm-template
 
-A simple, fast and easy to use Go library to run [helm template][helm-template] helm charts without the need of a helm binary or execution of helm as external command.
+Simple, fast and easy to use Go library to run [helm template][helm-template] without the need of a helm binary or its execution as an external command.
 
 ## Features
 
@@ -82,13 +82,13 @@ func main() {
 
 ## Tradeoffs
 
-The most powerful feature of Helm is the template system. This library doesn't support dependencies, hooks... just plain charts.
+This library doesn't support anything apart from simple `helm template`. dependencies, hooks... and similar _fancy_ features, are not supported.
 
 ## Why
 
-This gives the ability to Go applications to use the most powerful feature of helm, without the need to have to install and executing a process. This improves the portability and speed.
+[Helm]'s most powerful feature is its template system, lots of users only use [Helm] for this.
 
-Apart from this, we gain the ability to embed charts in binaries.
+Having a library for this use, that doesn't depend on helm dependency on the system, nor executing an external command improves the portability and performance of applications.
 
 ## Use cases
 
