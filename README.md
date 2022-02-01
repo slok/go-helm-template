@@ -84,19 +84,30 @@ func main() {
 
 This library doesn't support anything apart from simple `helm template`. dependencies, hooks... and similar _fancy_ features, are not supported.
 
+## Examples
+
+- [Chart unit test](./examples/chart-unit-test): An example that shows how to use the library for chart unit testing.
+- [Custom](examples/custom): An example that templates a chart with custom options (e.g CRDs).
+- [Embed](examples/embed): An example that renders charts embedded in the binary using [`embed.FS`][embed-fs].
+- [Memory](examples/memory): An example that templates a chart from memory.
+- [simple](examples/simple): A simple way of templating a chart in the FS.
+
 ## Why
 
 [Helm]'s most powerful feature is its template system, lots of users only use [Helm] for this.
 
 Having a library for this use, that doesn't depend on helm dependency on the system, nor executing an external command improves the portability and performance of applications.
 
-## Use cases
+
+
+## Some use cases
 
 - Remove process execution for simple helm template calls.
 - Control better the execution flow of rendering multiple charts.
-- Embed charts in compiled binaries with [`embed.FS`](https://pkg.go.dev/embed#FS).
+- Embed charts in compiled binaries with [`embed.FS`][embed-fs].
 - Increase Helm template speed.
 - Chart unit testing.
 
 [helm]: https://helm.sh
 [helm-template]: https://helm.sh/docs/helm/helm_template/
+[embed-fs]: https://pkg.go.dev/embed#FS

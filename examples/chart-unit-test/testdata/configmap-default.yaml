@@ -1,0 +1,11 @@
+---
+# Source: some-chart/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: some-chart-test-svc
+  namespace: test
+  labels:
+    some: default
+data:
+  something: something
