@@ -91,7 +91,7 @@ func main() {
 - [Custom](examples/custom): An example that templates a chart with custom options (e.g CRDs).
 - [Embed](examples/embed): An example that renders charts embedded in the binary using [`embed.FS`][embed-fs].
 - [Memory](examples/memory): An example that templates a chart from memory.
-- [simple](examples/simple): A simple way of templating a chart in the FS.
+- [Simple](examples/simple): A simple way of templating a chart in the FS.
 
 
 ## Tradeoffs
