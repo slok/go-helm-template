@@ -126,6 +126,17 @@ func LoadChart(ctx context.Context, f fs.FS) (*Chart, error) {
 	return &Chart{c: chart}, nil
 }
 
+// MustLoadChart is the same as LoadChart but panics if there is
+// any error while loading the chart.
+func MustLoadChart(ctx context.Context, f fs.FS) *Chart {
+	chart, err := LoadChart(ctx, f)
+	if err != nil {
+		panic(err)
+	}
+
+	return chart
+}
+
 var (
 	splitMarkRe    = regexp.MustCompile("(?m)^---")
 	fileMatchReFmt = `(?m)^# Source:.*%s$`
