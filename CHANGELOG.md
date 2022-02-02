@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add MustLoadChart as a helper tool when loaded once charts at package level.
+
 ## [v0.1.0] - 2022-02-02
 
 ### Added
