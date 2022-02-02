@@ -1,5 +1,10 @@
 # go-helm-template
 
+[![CI](https://github.com/slok/go-helm-template/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/slok/go-helm-template/actions/workflows/ci.yaml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/slok/go-helm-template)](https://goreportcard.com/report/github.com/slok/go-helm-template)
+[![Apache 2 licensed](https://img.shields.io/badge/license-Apache2-blue.svg)](https://raw.githubusercontent.com/slok/go-helm-template/master/LICENSE)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/slok/go-helm-template)](https://github.com/slok/go-helm-template/releases/latest)
+
 Simple, fast and easy to use Go library to run [helm template][helm-template] without the need of a [Helm] binary nor its execution as an external command.
 
 ## Features
