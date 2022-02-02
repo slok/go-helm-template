@@ -1,12 +1,12 @@
 # go-helm-template
 
-Simple, fast and easy to use Go library to run [helm template][helm-template] without the need of a helm binary or its execution as an external command.
+Simple, fast and easy to use Go library to run [helm template][helm-template] without the need of a [Helm] binary nor its execution as an external command.
 
 ## Features
 
 - Simple
 - Fast
-- Compatible with go [`fs.FS`](https://pkg.go.dev/io/fs#FS)
+- Compatible with go [`fs.FS`](https://pkg.go.dev/io/fs#FS) (Template charts from FS, embedded, memory...)
 - Testable.
 - No Helm binary required.
 - No external command execution from Go.
@@ -25,7 +25,7 @@ import (
     "github.com/slok/go-helm-template/helm"
 )
 
-// Chart data.
+// Chart data in memory.
 const (
     chart = `
 apiVersion: v2
@@ -80,10 +80,6 @@ func main() {
 }
 ```
 
-## Tradeoffs
-
-This library doesn't support anything apart from simple `helm template`. dependencies, hooks... and similar _fancy_ features, are not supported.
-
 ## Examples
 
 - [Chart unit test](./examples/chart-unit-test): An example that shows how to use the library for chart unit testing.
@@ -92,12 +88,16 @@ This library doesn't support anything apart from simple `helm template`. depende
 - [Memory](examples/memory): An example that templates a chart from memory.
 - [simple](examples/simple): A simple way of templating a chart in the FS.
 
+
+## Tradeoffs
+
+This library doesn't support anything apart from simple `helm template`. dependencies, hooks... and similar _fancy_ features, are not supported.
+
 ## Why
 
-[Helm]'s most powerful feature is its template system, lots of users only use [Helm] for this.
+One of the [Helm]'s most powerful feature (if not the most) is its template system, lots of users only use [Helm] for this usage.
 
-Having a library for this use, that doesn't depend on helm dependency on the system, nor executing an external command improves the portability and performance of applications.
-
+Not depending on helm as a system dependency, nor requiring to execute an external command, improves the portability and performance of applications that use Helm internally.
 
 
 ## Some use cases
