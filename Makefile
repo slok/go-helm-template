@@ -24,3 +24,7 @@ check:  ## Runs checks in CI environment (without docker).
 .PHONY: integration-test
 integration-test: ## Runs integraton test in CI environment (without docker).
 	./scripts/check/integration-test.sh
+
+.PHONY: docs
+docs: ## Runs docs example on :6060.
+	godoc -http=":6060"
