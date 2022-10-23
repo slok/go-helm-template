@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Update to Helm 3.10
+
 ## [v0.2.0] - 2022-02-02
 
 ### Added
