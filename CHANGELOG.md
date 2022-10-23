@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.3.0] - 2022-10-23
+
 ### Changed
 
 - Update to Helm 3.10
@@ -22,6 +24,7 @@
 - Examples.
 - Template example on godoc.
 
-[unreleased]: https://github.com/slok/go-helm-template/compare/v0.2.0...HEAD
+[unreleased]: https://github.com/slok/go-helm-template/compare/v0.3.0...HEAD
+[v0.3.0]: https://github.com/slok/go-helm-template/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/slok/go-helm-template/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/slok/go-helm-template/releases/tag/v0.1.0
