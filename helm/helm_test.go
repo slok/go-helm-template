@@ -156,7 +156,30 @@ func TestTemplate(t *testing.T) {
 			expManifests: "---\n# Source: test-chart/templates/something.yaml\nsomething: something---\n# Source: test-chart/templates/something1.yaml\nsomething1: something1---\n# Source: test-chart/templates/something3.yaml\nsomething3: something3",
 		},
 
-		"Filtering missing files should faul.": {
+		"Filtering files should only return the files specified (multiple yamls per file).": {
+			chart: func() *helm.Chart {
+				chartFS := newTestChartFS()
+				chartFS["values.yaml"] = &fstest.MapFile{Data: []byte("someValue: something")}
+				chartFS["templates/something.yaml"] = &fstest.MapFile{Data: []byte("something: something\n---\nsomething0: something0")}
+				chartFS["templates/something1.yaml"] = &fstest.MapFile{Data: []byte(`something1: something1`)}
+				chartFS["templates/something2.yaml"] = &fstest.MapFile{Data: []byte(`something2: something2`)}
+				chartFS["templates/something3.yaml"] = &fstest.MapFile{Data: []byte("something3: something3\n---\nsomething31: something31\n---\nsomething32: something32")}
+				chartFS["templates/something4.yaml"] = &fstest.MapFile{Data: []byte(`something4: something4`)}
+				c := mustLoadChart(chartFS)
+				return c
+			},
+			config: helm.TemplateConfig{
+				ReleaseName: "test",
+				ShowFiles: []string{
+					"templates/something.yaml",
+					"templates/something1.yaml",
+					"templates/something3.yaml",
+				},
+			},
+			expManifests: "---\n# Source: test-chart/templates/something.yaml\nsomething: something---\n# Source: test-chart/templates/something.yaml\nsomething0: something0---\n# Source: test-chart/templates/something1.yaml\nsomething1: something1---\n# Source: test-chart/templates/something3.yaml\nsomething3: something3---\n# Source: test-chart/templates/something3.yaml\nsomething31: something31---\n# Source: test-chart/templates/something3.yaml\nsomething32: something32",
+		},
+
+		"Filtering missing files should fail.": {
 			chart: func() *helm.Chart {
 				chartFS := newTestChartFS()
 				chartFS["values.yaml"] = &fstest.MapFile{Data: []byte("someValue: something")}
