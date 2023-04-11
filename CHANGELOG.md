@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Update to Helm 3.11
+
+### Added
+
+- Support multiple yaml blocks (`---`) on the same YAML files.
+
 ## [v0.3.0] - 2022-10-23
 
 ### Changed

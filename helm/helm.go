@@ -138,29 +138,46 @@ func MustLoadChart(ctx context.Context, f fs.FS) *Chart {
 }
 
 var (
-	splitMarkRe    = regexp.MustCompile("(?m)^---")
-	fileMatchReFmt = `(?m)^# Source:.*%s$`
+	splitMarkRe             = regexp.MustCompile("(?m)^---")
+	chartRenderedFileNameRe = regexp.MustCompile(`(?m)^# Source:(.*)$`)
 )
 
 func filterFiles(rendered string, files []string) (string, error) {
 	renderedSplit := splitMarkRe.Split(rendered, -1)
-	filteredRendered := []string{}
+	// Create an index to check if we need to filter (and a counter to see if we filtered something related with the file).
+	fileIndexAndMatched := map[string]int{}
 	for _, f := range files {
-		found := false
-		for _, text := range renderedSplit {
-			regex := fmt.Sprintf(fileMatchReFmt, f)
-			match, err := regexp.MatchString(regex, text)
-			if err != nil {
-				return "", fmt.Errorf("could not match file: %w", err)
-			}
-			if match {
-				found = true
-				filteredRendered = append(filteredRendered, text)
-				break
-			}
+		fileIndexAndMatched[f] = 0
+	}
+
+	filteredRendered := []string{}
+	for _, t := range renderedSplit {
+		t = strings.TrimSpace(t)
+		if t == "" {
+			continue
 		}
-		if !found {
-			return "", fmt.Errorf("no match for file: %q ", f)
+
+		// Get file name.
+		match := chartRenderedFileNameRe.FindStringSubmatch(t)
+		if len(match) == 0 {
+			return "", fmt.Errorf("could not match file")
+		}
+
+		// Sanitize and remove chart name.
+		renderedFile := strings.TrimSpace(match[1])
+		_, renderedFile, _ = strings.Cut(renderedFile, "/")
+
+		// If the file is the one we want to filter, add to result.
+		if _, ok := fileIndexAndMatched[renderedFile]; ok {
+			filteredRendered = append(filteredRendered, t)
+			fileIndexAndMatched[renderedFile]++
+		}
+	}
+
+	// Check all files matched at least once.
+	for k, v := range fileIndexAndMatched {
+		if v == 0 {
+			return "", fmt.Errorf("file %q didn't have any file match", k)
 		}
 	}
 
