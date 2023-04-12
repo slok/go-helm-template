@@ -183,8 +183,9 @@ func filterFiles(rendered string, files []string) (string, error) {
 
 	var b bytes.Buffer
 	for _, m := range filteredRendered {
-		_, _ = fmt.Fprintf(&b, "---\n%s", strings.TrimSpace(m))
+		_, _ = fmt.Fprintf(&b, "\n---\n%s", strings.TrimSpace(m))
 	}
+	result := strings.TrimSpace(b.String())
 
-	return b.String(), nil
+	return result, nil
 }
