@@ -153,7 +153,7 @@ func TestTemplate(t *testing.T) {
 					"templates/something3.yaml",
 				},
 			},
-			expManifests: "---\n# Source: test-chart/templates/something.yaml\nsomething: something---\n# Source: test-chart/templates/something1.yaml\nsomething1: something1---\n# Source: test-chart/templates/something3.yaml\nsomething3: something3",
+			expManifests: "---\n# Source: test-chart/templates/something.yaml\nsomething: something\n---\n# Source: test-chart/templates/something1.yaml\nsomething1: something1\n---\n# Source: test-chart/templates/something3.yaml\nsomething3: something3",
 		},
 
 		"Filtering files should only return the files specified (multiple yamls per file).": {
@@ -176,7 +176,7 @@ func TestTemplate(t *testing.T) {
 					"templates/something3.yaml",
 				},
 			},
-			expManifests: "---\n# Source: test-chart/templates/something.yaml\nsomething: something---\n# Source: test-chart/templates/something.yaml\nsomething0: something0---\n# Source: test-chart/templates/something1.yaml\nsomething1: something1---\n# Source: test-chart/templates/something3.yaml\nsomething3: something3---\n# Source: test-chart/templates/something3.yaml\nsomething31: something31---\n# Source: test-chart/templates/something3.yaml\nsomething32: something32",
+			expManifests: "---\n# Source: test-chart/templates/something.yaml\nsomething: something\n---\n# Source: test-chart/templates/something.yaml\nsomething0: something0\n---\n# Source: test-chart/templates/something1.yaml\nsomething1: something1\n---\n# Source: test-chart/templates/something3.yaml\nsomething3: something3\n---\n# Source: test-chart/templates/something3.yaml\nsomething31: something31\n---\n# Source: test-chart/templates/something3.yaml\nsomething32: something32",
 		},
 
 		"Filtering missing files should fail.": {
