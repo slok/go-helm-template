@@ -8,14 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     container: golangci/golangci-lint:v1.53.3-alpine
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: ./scripts/check/check.sh
 
   unit-test:
     name: Unit test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
