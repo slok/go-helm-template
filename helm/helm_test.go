@@ -130,7 +130,7 @@ func TestTemplate(t *testing.T) {
 				ReleaseName: "test",
 				IncludeCRDs: true,
 			},
-			expManifests: "---\n# Source: crds/something.yaml\nthis-is: a CRD\n---\n# Source: test-chart/templates/something.yaml\nsomething: something\n",
+			expManifests: "---\n# Source: test-chart/crds/something.yaml\nthis-is: a CRD\n---\n# Source: test-chart/templates/something.yaml\nsomething: something\n",
 		},
 
 		"Filtering files should only return the files specified.": {
