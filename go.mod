@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/stretchr/testify v1.8.4
-	helm.sh/helm/v3 v3.14.0
+	helm.sh/helm/v3 v3.14.2
 )
 
 require (
