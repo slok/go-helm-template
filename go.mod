@@ -3,7 +3,7 @@ module github.com/slok/go-helm-template
 go 1.21
 
 require (
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	helm.sh/helm/v3 v3.14.3
 )
 
