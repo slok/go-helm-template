@@ -6,10 +6,14 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
-    container: golangci/golangci-lint:v1.53.3-alpine
+    container: golangci/golangci-lint:v1.58.1-alpine
     steps:
       - uses: actions/checkout@v4
-      - run: ./scripts/check/check.sh
+      - run: |
+          # We need this go flag because it started to error after golangci-lint is using Go 1.21.
+          # TODO(slok): Remove it on next (>1.54.1) golangci-lint upgrade to check if this problem has gone.
+          export GOFLAGS="-buildvcs=false"
+          ./scripts/check/check.sh
 
   unit-test:
     name: Unit test
