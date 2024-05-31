@@ -98,7 +98,7 @@ func LoadChart(ctx context.Context, f fs.FS) (*Chart, error) {
 			return err
 		}
 
-		if d.IsDir() {
+		if d.IsDir() || d.Type() == fs.ModeSymlink {
 			return nil
 		}
 
