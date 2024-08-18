@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.7.0] - 2024-08-18
+
 ### Added
 
 - Support hook rendering option (disabled by default).
