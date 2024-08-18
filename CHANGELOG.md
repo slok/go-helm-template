@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Support hook rendering option (disabled by default).
+
 ## [v0.6.0] - 2024-05-19
 
 ### Changed

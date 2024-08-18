@@ -133,6 +133,39 @@ func TestTemplate(t *testing.T) {
 			expManifests: "---\n# Source: test-chart/crds/something.yaml\nthis-is: a CRD\n---\n# Source: test-chart/templates/something.yaml\nsomething: something\n",
 		},
 
+		"Having a chart with hooks and these disabled, it should not return the hooks.": {
+			chart: func() *helm.Chart {
+				chartFS := newTestChartFS()
+				chartFS["values.yaml"] = &fstest.MapFile{Data: []byte("someValue: something")}
+				chartFS["templates/something.yaml"] = &fstest.MapFile{Data: []byte(`something: something`)}
+				chartFS["templates/myhook.yaml"] = &fstest.MapFile{Data: []byte("apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: test\n  annotations:\n    helm.sh/hook: pre-install")}
+				c := mustLoadChart(chartFS)
+				return c
+			},
+			config: helm.TemplateConfig{
+				ReleaseName: "test",
+				IncludeCRDs: true,
+			},
+			expManifests: "---\n# Source: test-chart/templates/something.yaml\nsomething: something\n",
+		},
+
+		"Having a chart with hooks and these enabled, it should return also the hooks.": {
+			chart: func() *helm.Chart {
+				chartFS := newTestChartFS()
+				chartFS["values.yaml"] = &fstest.MapFile{Data: []byte("someValue: something")}
+				chartFS["templates/something.yaml"] = &fstest.MapFile{Data: []byte(`something: something`)}
+				chartFS["templates/myhook.yaml"] = &fstest.MapFile{Data: []byte("apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: test\n  annotations:\n    helm.sh/hook: pre-install")}
+				c := mustLoadChart(chartFS)
+				return c
+			},
+			config: helm.TemplateConfig{
+				ReleaseName: "test",
+				IncludeCRDs: true,
+				EnableHooks: true,
+			},
+			expManifests: "---\n# Source: test-chart/templates/something.yaml\nsomething: something\n---\n# Source: test-chart/templates/myhook.yaml\napiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: test\n  annotations:\n    helm.sh/hook: pre-install",
+		},
+
 		"Filtering files should only return the files specified.": {
 			chart: func() *helm.Chart {
 				chartFS := newTestChartFS()
