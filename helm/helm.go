@@ -11,6 +11,7 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/release"
 )
 
 // Chart represents a loaded Helm chart.
@@ -34,6 +35,8 @@ type TemplateConfig struct {
 	// by default it will render all.
 	// This can be handy on specific use cases like unit tests for charts.
 	ShowFiles []string
+	// If enabled, hooks will be rendered, if disabled it will be ignored.
+	EnableHooks bool
 }
 
 func (c *TemplateConfig) defaults() error {
@@ -67,6 +70,7 @@ func Template(ctx context.Context, config TemplateConfig) (string, error) {
 	client.ReleaseName = config.ReleaseName
 	client.IncludeCRDs = config.IncludeCRDs
 	client.Namespace = config.Namespace
+	client.DisableHooks = true
 
 	// Render chart.
 	rel, err := client.Run(config.Chart.c, config.Values)
@@ -80,6 +84,11 @@ func Template(ctx context.Context, config TemplateConfig) (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("could not filter manifest files: %w", err)
 		}
+	}
+
+	if config.EnableHooks && len(rel.Hooks) > 0 {
+		hookManifests := hooksToManifests(rel.Hooks)
+		manifests += hookManifests
 	}
 
 	return manifests, nil
@@ -188,4 +197,13 @@ func filterFiles(rendered string, files []string) (string, error) {
 	result := strings.TrimSpace(b.String())
 
 	return result, nil
+}
+
+func hooksToManifests(hooks []*release.Hook) string {
+	var manifests bytes.Buffer
+	for _, h := range hooks {
+		fmt.Fprintf(&manifests, "---\n# Source: %s\n%s\n", h.Path, h.Manifest)
+	}
+
+	return strings.TrimSpace(manifests.String())
 }
