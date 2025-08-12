@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     container: golangci/golangci-lint:v1.64.8-alpine
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: |
           # We need this go flag because it started to error after golangci-lint is using Go 1.21.
           # TODO(slok): Remove it on next (>1.54.1) golangci-lint upgrade to check if this problem has gone.
@@ -19,7 +19,7 @@ jobs:
     name: Unit test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
