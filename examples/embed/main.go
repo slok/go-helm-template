@@ -10,11 +10,12 @@ import (
 	"github.com/slok/go-helm-template/helm"
 )
 
-//go:embed all:charts/*
 // Raw embedded charts.
 //
 // Make sure you use Go >=1.18, so `_` prefixed files are included on embed.
 // https://github.com/golang/go/issues/43854.
+//
+//go:embed all:charts/*
 var embeddedCharts embed.FS
 var chartName = flag.String("chart", "", "Chart name.")
 

@@ -57,7 +57,7 @@ func TestTemplate(t *testing.T) {
 			expManifests: "---\n# Source: test-chart/templates/something.yaml\nsomething: something\n",
 		},
 
-		"Having a regular chart, defualt values could be override.": {
+		"Having a regular chart, default values could be override.": {
 			chart: func() *helm.Chart {
 				chartFS := newTestChartFS()
 				chartFS["values.yaml"] = &fstest.MapFile{Data: []byte("someValue: something")}
