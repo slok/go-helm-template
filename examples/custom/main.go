@@ -18,7 +18,7 @@ var (
 
 // Example:
 // git clone git@github.com:prometheus-community/helm-charts.git
-// go run ./ --name test --crds --chart-path ./helm-charts/charts/kube-prometheus-stack
+// go run ./ --name test <--crds --chart-path ./helm-charts/charts/kube-prometheus-stack.
 func main() {
 	flag.Parse()
 

@@ -1,0 +1,46 @@
+eg:
+  envoyproxy:
+    replicas: 2
+    image: hub.comcast.net/k8s-eng/envoyproxy/envoy:distroless-v1.29.3
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1024Mi
+      requests:
+        cpu: 256m
+        memory: 256Mi
+
+  shutdownManager:
+    image: hub.comcast.net/k8s-eng/envoyproxy/gateway:v1.1.0
+  rateLimit:
+    image: hub.comcast.net/k8s-eng/envoyproxy/ratelimit:master
+  certgen:
+    image: hub.comcast.net/k8s-eng/envoyproxy/gateway:v1.1.0
+  gateway:
+    replicas: 1
+    image: hub.comcast.net/k8s-eng/envoyproxy/gateway:v1.1.0
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1024Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+  testDeployment:
+    image: hub.comcast.net/k8s-eng/gcr.io/k8s-staging-gateway-api/echo-basic
+    resources:
+      limits:
+        cpu: 200m
+        memory: 1024Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+cfg:
+  tenant: "tenant2"
+  tsfService: "service1"
+  rail: "public"
+  lbIPs: "10.112.182.52"
+  controllerNamespace: tenant2-ns1
+  namespaces:
+    - tenant2-ns1
+    - tenant2-ns2
