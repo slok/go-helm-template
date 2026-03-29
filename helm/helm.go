@@ -8,15 +8,17 @@ import (
 	"regexp"
 	"strings"
 
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
-	"helm.sh/helm/v3/pkg/release"
+	"helm.sh/helm/v4/pkg/action"
+	"helm.sh/helm/v4/pkg/chart"
+	"helm.sh/helm/v4/pkg/chart/loader/archive"
+	chartv2 "helm.sh/helm/v4/pkg/chart/v2"
+	loaderv2 "helm.sh/helm/v4/pkg/chart/v2/loader"
+	"helm.sh/helm/v4/pkg/release"
 )
 
 // Chart represents a loaded Helm chart.
 type Chart struct {
-	c *chart.Chart
+	v2 *chartv2.Chart
 }
 
 // TemplateConfig is the configuration for Helm Template rendering.
@@ -64,21 +66,33 @@ func Template(ctx context.Context, config TemplateConfig) (string, error) {
 	}
 
 	// Create chart renderer.
-	client := action.NewInstall(&action.Configuration{})
-	client.ClientOnly = true
-	client.DryRun = true
+	client := action.NewInstall(action.NewConfiguration())
+	client.DryRunStrategy = action.DryRunClient
 	client.ReleaseName = config.ReleaseName
 	client.IncludeCRDs = config.IncludeCRDs
 	client.Namespace = config.Namespace
 	client.DisableHooks = true
 
 	// Render chart.
-	rel, err := client.Run(config.Chart.c, config.Values)
+	var chart chart.Charter
+	switch {
+	case config.Chart.v2 != nil:
+		chart = config.Chart.v2
+	default:
+		return "", fmt.Errorf("unsupported chart version")
+	}
+
+	rel, err := client.Run(chart, config.Values)
 	if err != nil {
 		return "", fmt.Errorf("could not render helm chart correctly: %w", err)
 	}
 
-	manifests := rel.Manifest
+	acc, err := release.NewAccessor(rel)
+	if err != nil {
+		return "", fmt.Errorf("could not access release data: %w", err)
+	}
+
+	manifests := acc.Manifest()
 	if len(config.ShowFiles) > 0 {
 		manifests, err = filterFiles(manifests, config.ShowFiles)
 		if err != nil {
@@ -86,8 +100,12 @@ func Template(ctx context.Context, config TemplateConfig) (string, error) {
 		}
 	}
 
-	if config.EnableHooks && len(rel.Hooks) > 0 {
-		hookManifests := hooksToManifests(rel.Hooks)
+	hooks := acc.Hooks()
+	if config.EnableHooks && len(hooks) > 0 {
+		hookManifests, err := hooksToManifests(hooks)
+		if err != nil {
+			return "", fmt.Errorf("could not render hook manifests: %w", err)
+		}
 		manifests += hookManifests
 	}
 
@@ -100,7 +118,7 @@ func Template(ctx context.Context, config TemplateConfig) (string, error) {
 //
 // You can use `fs.Sub` as a helper tool to get the root chart.
 func LoadChart(ctx context.Context, f fs.FS) (*Chart, error) {
-	files := []*loader.BufferedFile{}
+	files := []*archive.BufferedFile{}
 
 	err := fs.WalkDir(f, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -116,7 +134,7 @@ func LoadChart(ctx context.Context, f fs.FS) (*Chart, error) {
 			return fmt.Errorf("could not read manifest %s: %w", path, err)
 		}
 
-		files = append(files, &loader.BufferedFile{
+		files = append(files, &archive.BufferedFile{
 			Name: path,
 			Data: data,
 		})
@@ -127,12 +145,14 @@ func LoadChart(ctx context.Context, f fs.FS) (*Chart, error) {
 		return nil, fmt.Errorf("could not walk chart directory: %w", err)
 	}
 
-	chart, err := loader.LoadFiles(files)
+	// TODO(slok): When we have v3 chart support (https://github.com/helm/helm/blob/main/internal/chart/v3/chart.go)
+	// we should select the proper loader.
+	chartv2, err := loaderv2.LoadFiles(files)
 	if err != nil {
 		return nil, fmt.Errorf("could not load chart from files: %w", err)
 	}
 
-	return &Chart{c: chart}, nil
+	return &Chart{v2: chartv2}, nil
 }
 
 // MustLoadChart is the same as LoadChart but panics if there is
@@ -199,11 +219,15 @@ func filterFiles(rendered string, files []string) (string, error) {
 	return result, nil
 }
 
-func hooksToManifests(hooks []*release.Hook) string {
+func hooksToManifests(hooks []release.Hook) (string, error) {
 	var manifests bytes.Buffer
 	for _, h := range hooks {
-		fmt.Fprintf(&manifests, "---\n# Source: %s\n%s\n", h.Path, h.Manifest)
+		hacc, err := release.NewHookAccessor(h)
+		if err != nil {
+			return "", fmt.Errorf("could not access hook data: %w", err)
+		}
+		fmt.Fprintf(&manifests, "---\n# Source: %s\n%s\n", hacc.Path(), hacc.Manifest())
 	}
 
-	return strings.TrimSpace(manifests.String())
+	return strings.TrimSpace(manifests.String()), nil
 }
