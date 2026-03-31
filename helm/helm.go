@@ -39,6 +39,9 @@ type TemplateConfig struct {
 	ShowFiles []string
 	// If enabled, hooks will be rendered, if disabled it will be ignored.
 	EnableHooks bool
+	// APIVersions allows a manual set of supported API Versions to be passed
+	// (for things like templating). These are ignored if ClientOnly is false.
+	APIVersions []string
 }
 
 func (c *TemplateConfig) defaults() error {
@@ -72,6 +75,7 @@ func Template(ctx context.Context, config TemplateConfig) (string, error) {
 	client.IncludeCRDs = config.IncludeCRDs
 	client.Namespace = config.Namespace
 	client.DisableHooks = true
+	client.APIVersions = config.APIVersions
 
 	// Render chart.
 	var chart chart.Charter
